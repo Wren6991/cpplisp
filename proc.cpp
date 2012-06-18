@@ -117,6 +117,28 @@ cell proc_and(const cell &x)
     return result;
 }
 
+cell proc_or(const cell &x)
+{
+    cell result;
+    const cell *iter = &x;
+    while(iter && iter->car)
+    {
+        result = proc_eval(*iter->car);
+        iter = iter->cdr;
+        if (!(result == nil))
+            break;
+    }
+    return result;
+}
+
+cell proc_not(const cell &x)
+{
+    if (!x.car || !(proc_eval(*x.car) == nil))
+        return cell(v_symbol, "TRUE");
+    else
+        return nil;
+}
+
 cell proc_if(const cell &arglist)
 {
     if (!arglist.car)

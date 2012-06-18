@@ -11,6 +11,8 @@ cell proc_add(const cell &x);
 cell proc_subtract(const cell &x);
 cell proc_multiply(const cell &x);
 cell proc_and(const cell &x);
+cell proc_or(const cell &x);
+cell proc_not(const cell &x);
 cell proc_if(const cell &arglist);
 cell proc_equal(const cell &arglist);
 cell proc_less(const cell &arglist);

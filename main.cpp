@@ -22,6 +22,8 @@ void setupGlobals()
     global_env->vars["<="] = proc_less_equal;
     global_env->vars[">="] = proc_greater_equal;
     global_env->vars["AND"] = proc_and;
+    global_env->vars["OR"] = proc_or;
+    global_env->vars["NOT"] = proc_not;
     global_env->vars["IF"] = proc_if;
     global_env->vars["BEGIN"] = proc_begin;
     global_env->vars["DEFINE"] = proc_define;
