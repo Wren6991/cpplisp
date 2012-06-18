@@ -1,6 +1,4 @@
 #include <iostream>
-#include <map>
-#include <sstream>
 
 #include "tokenizer.h"
 #include "parser.h"
@@ -30,7 +28,11 @@ void setupGlobals()
     global_env->vars["QUOTE"] = proc_quote;
     global_env->vars["LAMBDA"] = proc_lambda;
     global_env->vars["LISTVARS"] = proc_listvars;
-    global_env->vars["NIL"] = nil;
+    global_env->vars["CONS"] = proc_cons;
+    global_env->vars["CAR"] = proc_car;
+    global_env->vars["CDR"] = proc_cdr;
+    global_env->vars["SETQ"] = proc_setq;
+    global_env->vars["NIL"] = cell(v_symbol, "NIL");
     global_env->vars["TRUE"] = cell(v_symbol, "TRUE");
     env = global_env;
 }
@@ -41,9 +43,9 @@ int main()
     setupGlobals();
     while (true)
     {
-        char progstring[500];
+        char progstring[5000];
         std::cout << "> ";
-        std::cin.getline(progstring, 500, '\n');
+        std::cin.getline(progstring, 5000, '\n');
 
         std::vector<token> tokens = tokenize(progstring);
         parser p(tokens);

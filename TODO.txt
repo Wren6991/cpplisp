@@ -1,0 +1,12 @@
+=== Must:
+- macros
+- quasi-quote etc.
+- control: while, loop
+=== Should:
+- proper memory management
+-
+=== Could:
+- tail-call recursion
+
+=== Would like:
+- concurrency (continuations: call/cc)

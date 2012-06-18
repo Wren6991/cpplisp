@@ -7,3 +7,6 @@ x
 (define addtwo (getadder 2))
 (addfive 6)
 (addtwo 4)
+
+
+((lambda (f a) (f f a)) (lambda (f n) (if (> n 1) (* n (f f (- n 1))) 1))  5)

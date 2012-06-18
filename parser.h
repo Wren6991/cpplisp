@@ -49,7 +49,7 @@ struct environment
     std::map <std::string, cell> vars;
     std::shared_ptr <environment> parent;
 
-    cell get(std::string name);
+    cell& get(std::string name);
     environment(std::shared_ptr<environment> parent_ = std::shared_ptr<environment>()) {parent = parent_;}
 };
 

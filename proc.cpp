@@ -27,7 +27,7 @@ std::string toString(const cell& x)
     else if (x.type == v_list)
     {
         std::stringstream ss;
-        ss << "(" << (x.car? toString(*x.car) : "") << " " << (x.cdr? toString(*x.cdr) : "") << ")";
+        ss << "(" << (x.car? toString(*x.car) : "") << " . " << (x.cdr? toString(*x.cdr) : "") << ")";
         return ss.str();
     }
     else if (x.type == v_proc)
@@ -248,6 +248,52 @@ cell proc_listvars(const cell &_)
         std::cout << toString(iter->second) << "\n";
     }
     return cell();
+}
+
+cell proc_cons(const cell &arglist)
+{
+    if (!arglist.car || !arglist.cdr || !arglist.cdr->car)
+        return nil;
+    cell *car = new cell;
+    cell *cdr = new cell;
+    *car = proc_eval(*arglist.car);
+    *cdr = proc_eval(*arglist.cdr->car);
+    return cell(car, cdr);
+}
+
+cell proc_car(const cell &arglist)
+{
+    if (!arglist.car)
+        return nil;
+    cell cons = proc_eval(*arglist.car);
+    if (cons.type != v_list)
+        throw(exception("Error: tried to take car of non-list."));
+    if (!cons.car)
+        return nil;
+    return *cons.car;
+}
+
+cell proc_cdr(const cell &arglist)
+{
+    if (!arglist.car)
+        return nil;
+    cell cons = proc_eval(*arglist.car);
+    if (cons.type != v_list)
+        throw(exception("Error: tried to take cdr of non-list."));
+    if (!cons.cdr)
+        return nil;
+    return *cons.cdr;
+}
+
+cell proc_setq(const cell &arglist)
+{
+    if (!arglist.car || !arglist.cdr || !arglist.cdr->car)
+        throw(exception("Error: missing arguments to setq"));
+    if (arglist.car->type != v_symbol)
+        throw(exception("Error: tried to setq non-symbol."));
+    cell val = proc_eval(*arglist.cdr->car);
+    env->get(arglist.car->str) = val;
+    return val;
 }
 
 

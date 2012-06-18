@@ -22,5 +22,9 @@ cell proc_begin(const cell &arglist);
 cell proc_lambda(const cell &arglist);
 cell proc_listvars(const cell &_);
 cell proc_eval(const cell &x);
+cell proc_cons(const cell &arglist);
+cell proc_car(const cell &arglist);
+cell proc_cdr(const cell &arglist);
+cell proc_setq(const cell &arglist);
 
 #endif // PROC_H_INCLUDED

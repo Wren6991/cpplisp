@@ -86,14 +86,14 @@ bool cell::operator==(const cell &c) const
 }
 
 
-cell environment::get(std::string name)
+cell& environment::get(std::string name)
 {
     std::map<std::string, cell>::iterator iter = vars.find(name);
     if (iter != vars.end())
         return iter->second;
     if (parent)
         return parent->get(name);
-    return cell(v_symbol, "NIL");
+    return vars[name];
 }
 
 
@@ -133,7 +133,13 @@ bool parser::expect(token_type type)
 
 cell parser::read()
 {
-    if (accept(t_string))
+    if (accept(t_quote))
+    {
+        cell *car = new cell();
+        *car = read();
+        return cell(new cell(v_symbol, "QUOTE"), new cell(car, (cell*)0));
+    }
+    else if (accept(t_string))
         return cell(v_string, last.value);
     else if (accept(t_symbol))
         return cell(v_symbol, toUpper(last.value));

@@ -10,7 +10,8 @@ typedef enum
     t_rparen,
     t_symbol,
     t_number,
-    t_string
+    t_string,
+    t_quote
 } token_type;
 
 struct token

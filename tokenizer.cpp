@@ -67,6 +67,8 @@ std::vector<token> tokenize(std::string progstring)
                     state = s_symbol;
                 else if (v == '"')
                     state = s_string;
+                else if (v == '\'')
+                    tokens.push_back(token(t_quote, "'"));
             break;
             case s_number:
                 if (v < '0' || v > '9')
