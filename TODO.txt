@@ -4,7 +4,7 @@
 - control: while, loop
 === Should:
 - proper memory management
--
+- defun (macro?)
 === Could:
 - tail-call recursion
 
