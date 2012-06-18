@@ -1,0 +1,9 @@
+(define x 6) 
+x 
+(define cube (lambda (x) (* x x x))) 
+(cube x) 
+(define getadder (lambda (x) (lambda (y) (+ x y)))) 
+(define addfive (getadder 5))
+(define addtwo (getadder 2))
+(addfive 6)
+(addtwo 4)
