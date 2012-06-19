@@ -33,6 +33,8 @@ void setupGlobals()
     global_env->vars["QUOTE"] = proc_quote;
     global_env->vars["QUASI-QUOTE"] = proc_quasi_quote;
     global_env->vars["LAMBDA"] = proc_lambda;
+    global_env->vars["MACRO"] = proc_macro;
+    global_env->vars["MACROEXPAND-1"] = proc_macroexpand;
     global_env->vars["LISTVARS"] = proc_listvars;
     global_env->vars["CONS"] = proc_cons;
     global_env->vars["CAR"] = proc_car;

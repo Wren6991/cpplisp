@@ -17,42 +17,53 @@ const cell nil(v_symbol, "NIL");
 
 std::string toString(const cell& x)
 {
-    if (x.type == v_number)
+    switch(x.type)
     {
-        std::stringstream ss;
-        ss << x.n;
-        return ss.str();
-    }
-    else if (x.type == v_string || x.type == v_symbol)
-        return x.str;
-    else if (x.type == v_list)
-    {
-        std::stringstream ss;
-        ss << "(";
-        const cell *iter = &x;
-        while (iter && iter->car)
+        case v_string:
+        case v_symbol:
+            return x.str;
+        case v_number:
         {
-            ss << toString(*iter->car);
-            iter = iter->cdr;
-            if (iter && iter->car)
-                ss << " ";
+            std::stringstream ss;
+            ss << x.n;
+            return ss.str();
         }
-        ss << ")";
-        return ss.str();
+        case v_list:
+        {
+            std::stringstream ss;
+            ss << "(";
+            const cell *iter = &x;
+            while (iter && iter->car)
+            {
+                ss << toString(*iter->car);
+                iter = iter->cdr;
+                if (iter && iter->car)
+                    ss << " ";
+            }
+            ss << ")";
+            return ss.str();
+        }
+        case v_proc:
+        {
+            std::stringstream ss;
+            ss << "<native function @" << std::hex << (int)x.proc << ">";
+            return ss.str();
+        }
+        case v_function:
+        {
+            std::stringstream ss;
+            ss << "<interpreted function @" << std::hex << (int)x.cdr->car << ">";
+            return ss.str();
+        }
+        case v_macro:
+        {
+            std::stringstream ss;
+            ss << "<macro @" << std::hex << (int)x.cdr->car << ">";
+            return ss.str();
+        }
+        default:
+            return "NIL";
     }
-    else if (x.type == v_proc)
-    {
-        std::stringstream ss;
-        ss << "<native function @" << std::hex << (int)x.proc << ">";
-        return ss.str();
-    }
-    else if (x.type == v_function)
-    {
-        std::stringstream ss;
-        ss << "<interpreted function @" << std::hex << (int)x.cdr->car << ">";
-        return ss.str();
-    }
-    return "NIL";
 }
 
 cell proc_print(const cell &x)
@@ -324,6 +335,51 @@ cell proc_lambda(const cell &arglist)
     return func_cell;
 }
 
+cell proc_macro(const cell &arglist)
+{
+    if(!arglist.car || arglist.car->type != v_list)
+        throw(exception("Error: missing argument list for macro"));
+    if (!arglist.cdr || !arglist.cdr->car)
+        throw(exception("Error: missing macro body for macro"));
+
+    const cell *iter = arglist.car;
+    while (iter && iter->car)
+    {
+        if (iter->car->type != v_symbol)
+            throw(exception("Error: argument names must be symbols (macro)."));
+        iter = iter->cdr;
+    }
+
+    cell macro_cell(v_macro);
+    macro_cell.car = arglist.car;
+    macro_cell.cdr = arglist.cdr;
+    return macro_cell;
+}
+
+cell expand_macro(const cell& macro, const cell& arglist)
+{
+    env = std::shared_ptr<environment>(new environment(env));       //push a new closure for the arguments.
+    const cell *arg_iter = &arglist;
+    const cell *name_iter = macro.car;
+    while (arg_iter && arg_iter->car && name_iter && name_iter->car)
+    {
+        env->vars[name_iter->car->str] = *arg_iter->car;
+        arg_iter = arg_iter->cdr;
+        name_iter = name_iter->cdr;
+    }
+    cell expandedval = proc_eval(*macro.cdr->car);
+    env = env->parent;      //pop the argument closure.
+    return expandedval;
+}
+
+cell proc_macroexpand(const cell &arglist)
+{
+    cell macro;
+    if (!arglist.car || (macro = proc_eval(*arglist.car)).type != v_macro)
+        throw(exception("Error: expected macro as first argument to macroexpand."));
+    return expand_macro(macro, arglist.cdr? *arglist.cdr : cell(v_list));
+}
+
 cell proc_listvars(const cell &_)
 {
     std::cout << "Listing variables.\n";
@@ -463,6 +519,8 @@ cell proc_eval(const cell &x)
             env = oldenv;
             return result;
         }
+        if (head.type == v_macro)
+            return proc_eval(expand_macro(head, x.cdr? *x.cdr : cell(v_list)));
 
         throw(exception("Error: attempt to call non-proc"));
 

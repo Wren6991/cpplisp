@@ -84,7 +84,7 @@ std::vector<token> tokenize(std::string progstring)
                 }
             break;
             case s_symbol:
-                if (!characterAllowed[v])
+                if (!(characterAllowed[v] || (v >= '0' && v <= '9')))
                 {
                     tokens.push_back(token(t_symbol, progstring.substr(regionstart, index - regionstart)));
                     --index;

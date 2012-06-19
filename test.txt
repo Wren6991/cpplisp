@@ -19,3 +19,11 @@ x
 (define e '(< 1 2)) 
 e 
 (eval e) 
+
+(define nil! (macro (var) `(setq ,var nil)))
+(nil! x)
+
+
+(define defmacro (macro (var lis body) `(define ,var (macro ,lis ,body))))
+(defmacro add (x y) `(+ ,x ,y))
+; ==> (DEFINE ADD (MACRO (X Y) (QUASI-QUOTE (+ (UN-QUOTE X) (UN-QUOTE Y)))))

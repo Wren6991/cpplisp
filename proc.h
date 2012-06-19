@@ -25,6 +25,8 @@ cell proc_quasi_quote(const cell &arglist);
 cell proc_unquote(const cell &arglist);
 cell proc_begin(const cell &arglist);
 cell proc_lambda(const cell &arglist);
+cell proc_macro(const cell &arglist);
+cell proc_macroexpand(const cell &arglist);
 cell proc_listvars(const cell &_);
 cell proc_let(const cell &arglist);
 cell proc_eval(const cell &x);

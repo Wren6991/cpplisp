@@ -17,16 +17,19 @@ typedef enum
     v_string,
     v_function,
     v_proc,
-    v_list
+    v_list,
+    v_macro
 } cell_type;
 
 struct environment;
 
+
 struct cell
 {
+    typedef std::shared_ptr<cell> pcell;
     typedef cell (*proc_t) (const cell&);
     cell_type type;
-    cell *car; cell *cdr;
+    cell* car; cell* cdr;
     std::string str;
     double n;
     proc_t proc;
