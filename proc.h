@@ -21,6 +21,8 @@ cell proc_greater(const cell &arglist);
 cell proc_less_equal(const cell &arglist);
 cell proc_greater_equal(const cell &arglist);
 cell proc_quote(const cell &arglist);
+cell proc_quasi_quote(const cell &arglist);
+cell proc_unquote(const cell &arglist);
 cell proc_begin(const cell &arglist);
 cell proc_lambda(const cell &arglist);
 cell proc_listvars(const cell &_);

@@ -31,6 +31,7 @@ void setupGlobals()
     global_env->vars["BEGIN"] = proc_begin;
     global_env->vars["DEFINE"] = proc_define;
     global_env->vars["QUOTE"] = proc_quote;
+    global_env->vars["QUASI-QUOTE"] = proc_quasi_quote;
     global_env->vars["LAMBDA"] = proc_lambda;
     global_env->vars["LISTVARS"] = proc_listvars;
     global_env->vars["CONS"] = proc_cons;
@@ -54,8 +55,6 @@ int main()
         std::cin.getline(progstring, 5000, '\n');
 
         std::vector<token> tokens = tokenize(progstring);
-        for (int i = 0; i < tokens.size(); i++)
-            std::cout << tokens[i].type << ": " << tokens[i].value << "\n";
         parser p(tokens);
         try
         {

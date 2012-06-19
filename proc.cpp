@@ -28,7 +28,16 @@ std::string toString(const cell& x)
     else if (x.type == v_list)
     {
         std::stringstream ss;
-        ss << "(" << (x.car? toString(*x.car) : "") << " " << (x.cdr? toString(*x.cdr) : "") << ")";
+        ss << "(";
+        const cell *iter = &x;
+        while (iter && iter->car)
+        {
+            ss << toString(*iter->car);
+            iter = iter->cdr;
+            if (iter && iter->car)
+                ss << " ";
+        }
+        ss << ")";
         return ss.str();
     }
     else if (x.type == v_proc)
@@ -241,6 +250,42 @@ cell proc_quote(const cell &arglist)
 {
     if (arglist.car)
         return *arglist.car;
+    else
+        return nil;
+}
+
+cell quasi_quote(const cell& x)
+{
+    if (x.type != v_list)
+        return x;
+    if (x.car && x.car->type == v_symbol && x.car->str == "UN-QUOTE")
+        return x.cdr? proc_unquote(*x.cdr) : nil;
+    cell head(v_list);
+    cell *tail = &head;
+    const cell *iter = &x;
+    while (iter && iter->car)
+    {
+        tail->car = new cell();
+        *tail->car = quasi_quote(*iter->car);
+        tail->cdr = new cell(v_list);
+        tail = tail->cdr;
+        iter = iter->cdr;
+    }
+    return head;
+}
+
+cell proc_quasi_quote(const cell &arglist)      //arglist wrapper (actual implementation is recursive, so we need to strip out the arglist semantics)
+{
+    if (!arglist.car)
+        return nil;
+    else
+        return quasi_quote(*arglist.car);
+}
+
+cell proc_unquote(const cell &arglist)
+{
+    if (arglist.car)
+        return proc_eval(*arglist.car);
     else
         return nil;
 }
