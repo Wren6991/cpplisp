@@ -9,6 +9,7 @@
 - hashes
 === Could:
 - tail-call recursion
+- VM + bytecode compiler
 
 === Would like:
 - concurrency (continuations: call/cc)

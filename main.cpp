@@ -37,6 +37,7 @@ void setupGlobals()
     global_env->vars["CAR"] = proc_car;
     global_env->vars["CDR"] = proc_cdr;
     global_env->vars["SETQ"] = proc_setq;
+    global_env->vars["LET"] = proc_let;
     global_env->vars["NIL"] = cell(v_symbol, "NIL");
     global_env->vars["TRUE"] = cell(v_symbol, "TRUE");
     env = global_env;
@@ -53,6 +54,8 @@ int main()
         std::cin.getline(progstring, 5000, '\n');
 
         std::vector<token> tokens = tokenize(progstring);
+        for (int i = 0; i < tokens.size(); i++)
+            std::cout << tokens[i].type << ": " << tokens[i].value << "\n";
         parser p(tokens);
         try
         {

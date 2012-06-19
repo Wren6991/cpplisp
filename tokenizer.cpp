@@ -48,7 +48,7 @@ std::vector<token> tokenize(std::string progstring)
     int index = -1;
     int regionstart;
 
-    while (++index < progstring.size())
+    while (++index <= progstring.size())
     {
         char v = progstring.c_str()[index];
         switch(state)
@@ -67,8 +67,13 @@ std::vector<token> tokenize(std::string progstring)
                     state = s_symbol;
                 else if (v == '"')
                     state = s_string;
-                else if (v == '\'')
-                    tokens.push_back(token(t_quote, "'"));
+                else if (v == '\'' || v == '`' || v == ',')     //quote, backquote, comma
+                {
+                    char str[2];
+                    str[0] = v;
+                    str[1] = 0;
+                    tokens.push_back(token(t_quote, str));
+                }
             break;
             case s_number:
                 if (v < '0' || v > '9')
@@ -79,11 +84,10 @@ std::vector<token> tokenize(std::string progstring)
                 }
             break;
             case s_symbol:
-                if (!characterAllowed[v] || index == progstring.size() - 1)
+                if (!characterAllowed[v])
                 {
                     tokens.push_back(token(t_symbol, progstring.substr(regionstart, index - regionstart)));
-                    if (index < progstring.size() - 1)
-                        index--;
+                    --index;
                     state = s_start;
                 }
             break;

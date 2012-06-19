@@ -135,9 +135,16 @@ cell parser::read()
 {
     if (accept(t_quote))
     {
+        std::string quoteType = last.value;
         cell *car = new cell();
         *car = read();
-        return cell(new cell(v_symbol, "QUOTE"), new cell(car, (cell*)0));
+        if (quoteType == "'")
+            return cell(new cell(v_symbol, "QUOTE"), new cell(car, (cell*)0));
+        else if (quoteType == "`")
+            return cell(new cell(v_symbol, "QUASI-QUOTE"), new cell(car, (cell*)0));
+        else if (quoteType == ",")
+            return cell(new cell(v_symbol, "UN-QUOTE"), new cell(car, (cell*)0));
+        throw(exception("Error: unknown quote type!"));
     }
     else if (accept(t_string))
         return cell(v_string, last.value);

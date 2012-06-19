@@ -15,3 +15,7 @@ x
 (while false '(print 5)) 
 (define i 0) 
 (while '(< i 10) '(setq i (print (+ i 1)))) 
+
+(define e '(< 1 2)) 
+e 
+(eval e) 

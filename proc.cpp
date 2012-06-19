@@ -1,6 +1,7 @@
 #include <iostream>
 #include <map>
 #include <sstream>
+#include <iomanip>
 
 #include "parser.h"
 #include "proc.h"
@@ -13,21 +14,6 @@ extern std::shared_ptr<environment> env;
 
 
 const cell nil(v_symbol, "NIL");
-
-std::string toHex(int x)
-{
-    char str[9];
-    str[8] = 0;
-    for (int i = 0; i < 8; i++)
-    {
-        char c = (x >> (i << 2)) & 0xf;
-        if (c < 10)
-            str[i] = c + '0';
-        else
-            str[i] = c + ('A' - 10);
-    }
-    return std::string(str);
-}
 
 std::string toString(const cell& x)
 {
@@ -48,12 +34,14 @@ std::string toString(const cell& x)
     else if (x.type == v_proc)
     {
         std::stringstream ss;
-        ss << "<native function @" << toHex((int)x.proc) << ">";
+        ss << "<native function @" << std::hex << (int)x.proc << ">";
         return ss.str();
     }
     else if (x.type == v_function)
     {
-        return "<interpreted function>";
+        std::stringstream ss;
+        ss << "<interpreted function @" << std::hex << (int)x.cdr->car << ">";
+        return ss.str();
     }
     return "NIL";
 }
@@ -351,8 +339,37 @@ cell proc_setq(const cell &arglist)
     return val;
 }
 
+cell proc_let(const cell &arglist)
+{
+    if (!arglist.car || arglist.car->type != v_list)
+        throw(exception("Error: function let expects assignment list as first argument."));
+    std::shared_ptr<environment> newenv(new environment(env));
+    const cell *iter = arglist.car;
+    while (iter && iter->car)
+    {
+        if (iter->car->type == v_symbol)
+        {
+            newenv->vars[iter->car->str] = nil;
+        }
+        else
+        {
+            if (iter->car->type != v_list || !iter->car->car || iter->car->car->type != v_symbol || !iter->car->cdr || !iter->car->cdr->car)        //in order: not a list || no first item || first item not symbol || no link to second item || second item has no value
+                throw(exception("Error: let assignment must be symbol or symbol-value pair."));
+            newenv->vars[iter->car->car->str] = proc_eval(*iter->car->cdr->car);
+        }
+        iter = iter->cdr;
+    }
+    if (!arglist.cdr || !arglist.cdr->car)
+        throw(exception("Error: let is missing body."));
+    std::shared_ptr<environment> oldenv = env;
+    env = newenv;
+    cell result = proc_eval(*arglist.cdr->car);
+    env = oldenv;
+    return result;
+}
 
-cell proc_eval_arglist(const cell &arglist)     // all procs take an uneval'd arg list, in order for functions such as quote to use the same interface (the don't eval their args):
+
+cell proc_eval_arglist(const cell &arglist)     // all procs take an uneval'd arg list, in order for functions such as quote to use the same interface (they don't eval their args):
 {                                               // proc_eval_arglist is an interface that is called from LISP code, which unzips the argument list and passes it to eval.
                                                 // proc_eval contains the actual eval implementation.
     const cell *iter = &arglist;
