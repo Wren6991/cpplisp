@@ -5,6 +5,8 @@
 === Should:
 - proper memory management
 - defun (macro?)
+- assoc-lists
+- hashes
 === Could:
 - tail-call recursion
 

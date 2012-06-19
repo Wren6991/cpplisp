@@ -10,3 +10,8 @@ x
 
 
 ((lambda (f a) (f f a)) (lambda (f n) (if (> n 1) (* n (f f (- n 1))) 1))  5)
+
+(define while (lambda (cond expr) (if (and (eval cond) (or (eval expr) true)) (while cond expr) nil))) 
+(while false '(print 5)) 
+(define i 0) 
+(while '(< i 10) '(setq i (print (+ i 1)))) 

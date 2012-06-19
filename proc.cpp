@@ -14,6 +14,21 @@ extern std::shared_ptr<environment> env;
 
 const cell nil(v_symbol, "NIL");
 
+std::string toHex(int x)
+{
+    char str[9];
+    str[8] = 0;
+    for (int i = 0; i < 8; i++)
+    {
+        char c = (x >> (i << 2)) & 0xf;
+        if (c < 10)
+            str[i] = c + '0';
+        else
+            str[i] = c + ('A' - 10);
+    }
+    return std::string(str);
+}
+
 std::string toString(const cell& x)
 {
     if (x.type == v_number)
@@ -27,13 +42,13 @@ std::string toString(const cell& x)
     else if (x.type == v_list)
     {
         std::stringstream ss;
-        ss << "(" << (x.car? toString(*x.car) : "") << " . " << (x.cdr? toString(*x.cdr) : "") << ")";
+        ss << "(" << (x.car? toString(*x.car) : "") << " " << (x.cdr? toString(*x.cdr) : "") << ")";
         return ss.str();
     }
     else if (x.type == v_proc)
     {
         std::stringstream ss;
-        ss << "<native function @" << (int)x.proc << ">";
+        ss << "<native function @" << toHex((int)x.proc) << ">";
         return ss.str();
     }
     else if (x.type == v_function)
@@ -103,6 +118,24 @@ cell proc_multiply(const cell &x)
     return cell(total);
 }
 
+cell proc_divide(const cell &arglist)
+{
+    double total = 1;
+    const cell *iter = &arglist;
+    bool first = true;
+    while(iter && iter->car)
+    {
+        total /= proc_eval(*iter->car).n;
+        iter = iter->cdr;
+        if (first)
+        {
+            total = 1.0 / total;
+            first = false;
+        }
+    }
+    return cell(total);
+}
+
 cell proc_and(const cell &x)
 {
     cell result;
@@ -133,7 +166,7 @@ cell proc_or(const cell &x)
 
 cell proc_not(const cell &x)
 {
-    if (!x.car || !(proc_eval(*x.car) == nil))
+    if (!x.car || proc_eval(*x.car) == nil)
         return cell(v_symbol, "TRUE");
     else
         return nil;
@@ -319,13 +352,29 @@ cell proc_setq(const cell &arglist)
 }
 
 
+cell proc_eval_arglist(const cell &arglist)     // all procs take an uneval'd arg list, in order for functions such as quote to use the same interface (the don't eval their args):
+{                                               // proc_eval_arglist is an interface that is called from LISP code, which unzips the argument list and passes it to eval.
+                                                // proc_eval contains the actual eval implementation.
+    const cell *iter = &arglist;
+    cell result;
+    while (iter && iter->car)
+    {
+        result = proc_eval(proc_eval(*iter->car));      //eval the argument, then perform the _requested_ eval function.
+        iter = iter->cdr;
+    }
+    return result;
+}
+
 cell proc_eval(const cell &x)
 {
+    bool listvars = false;
+    if (listvars)
+        proc_listvars(cell());
     if (x.type == v_string || x.type == v_number || x.type == v_function)
         return x;
     else if (x.type == v_symbol)
     {
-        //std::cout << "fetching var " << x.str << "\n";
+        //std::cout << "fetching var " << x.str << ": " << toString(env->get(x.str)) << "\n";
         return env->get(x.str);
     }
     else if (x.type == v_list)
