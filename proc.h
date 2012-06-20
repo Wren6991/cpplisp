@@ -29,11 +29,20 @@ cell proc_macro(const cell &arglist);
 cell proc_macroexpand(const cell &arglist);
 cell proc_listvars(const cell &_);
 cell proc_let(const cell &arglist);
+cell proc_tagbody(const cell &arglist);
+cell proc_go(const cell &arglist);
 cell proc_eval(const cell &x);
 cell proc_eval_arglist(const cell &arglist);
 cell proc_cons(const cell &arglist);
 cell proc_car(const cell &arglist);
 cell proc_cdr(const cell &arglist);
 cell proc_setq(const cell &arglist);
+
+struct tag
+{
+    std::string str;
+    tag() {}
+    tag(std::string str_) {str = str_;}
+};
 
 #endif // PROC_H_INCLUDED

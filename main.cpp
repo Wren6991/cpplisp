@@ -36,6 +36,8 @@ void setupGlobals()
     global_env->vars["MACRO"] = proc_macro;
     global_env->vars["MACROEXPAND-1"] = proc_macroexpand;
     global_env->vars["LISTVARS"] = proc_listvars;
+    global_env->vars["TAGBODY"] = proc_tagbody;
+    global_env->vars["GO"] = proc_go;
     global_env->vars["CONS"] = proc_cons;
     global_env->vars["CAR"] = proc_car;
     global_env->vars["CDR"] = proc_cdr;

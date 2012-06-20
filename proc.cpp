@@ -440,6 +440,46 @@ cell proc_setq(const cell &arglist)
     return val;
 }
 
+cell proc_tagbody(const cell &arglist)
+{
+    std::map <std::string, int> tagindices;
+    std::vector <const cell*> expressions;
+    const cell *iter = &arglist;
+    while (iter && iter->car)
+    {
+        if (iter->car->type == v_symbol)
+            tagindices[iter->car->str] = expressions.size();
+        else
+            expressions.push_back(iter->car);
+        iter = iter->cdr;
+    }
+    cell result;
+    int exprindex = 0;
+    while (exprindex < expressions.size())
+    {
+        try
+        {
+            result = proc_eval(*expressions[exprindex]);
+            exprindex++;
+        }
+        catch (tag t)
+        {
+            if (tagindices.find(t.str) == tagindices.end())
+                throw(t);                                   //doesn't belong to this tag body - pass it on to the next, or to the REPL if it isn't caught.
+            else
+                exprindex = tagindices[t.str];
+        }
+    }
+    return result;
+}
+
+cell proc_go(const cell &arglist)
+{
+    if (!arglist.car || arglist.car->type != v_symbol)
+        throw(exception("Error: expected symbol as argument to go."));
+    throw(tag(arglist.car->str));
+}
+
 cell proc_let(const cell &arglist)
 {
     if (!arglist.car || arglist.car->type != v_list)

@@ -1,7 +1,9 @@
 === Must:
-- macros
-- quasi-quote etc.
 - control: while, loop
+  - tagbody, go
+- &rest + &optional arguments.
+- multi-form function bodies.
+- ,@ (list unquote) operator
 === Should:
 - proper memory management
 - defun (macro?)
