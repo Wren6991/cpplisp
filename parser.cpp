@@ -144,6 +144,8 @@ cell parser::read()
             return cell(new cell(v_symbol, "QUASI-QUOTE"), new cell(car, (cell*)0));
         else if (quoteType == ",")
             return cell(new cell(v_symbol, "UN-QUOTE"), new cell(car, (cell*)0));
+        else if (quoteType == ",@")
+            return cell(new cell(v_symbol, "SPLICE-UN-QUOTE"), new cell(car, (cell*)0));
         throw(exception("Error: unknown quote type!"));
     }
     else if (accept(t_string))

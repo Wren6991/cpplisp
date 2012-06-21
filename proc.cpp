@@ -265,21 +265,53 @@ cell proc_quote(const cell &arglist)
         return nil;
 }
 
-cell quasi_quote(const cell& x)
+cell quasi_quote(const cell& x, bool &signalSplice)
 {
     if (x.type != v_list)
         return x;
-    if (x.car && x.car->type == v_symbol && x.car->str == "UN-QUOTE")
-        return x.cdr? proc_unquote(*x.cdr) : nil;
+    if (x.car && x.car->type == v_symbol)
+    {
+        if (x.car->str == "SPLICE-UN-QUOTE")
+            signalSplice = true;
+        if (signalSplice || x.car->str == "UN-QUOTE")
+            return x.cdr? proc_unquote(*x.cdr) : nil;
+    }
     cell head(v_list);
     cell *tail = &head;
+    cell *pretail = 0;      //cell before tail - so we can splice in ,@forms
+    bool splicetail;
     const cell *iter = &x;
     while (iter && iter->car)
     {
+        splicetail = false;
         tail->car = new cell();
-        *tail->car = quasi_quote(*iter->car);
-        tail->cdr = new cell(v_list);
-        tail = tail->cdr;
+        *tail->car = quasi_quote(*iter->car, splicetail);
+        if (splicetail)
+        {
+            if (tail->car->type != v_list)
+                throw(exception("Error: attempt to splice non-list (,@)"));
+            if (pretail)                                //if we have a pointer to the cons before the tail:
+            {
+                pretail->cdr = tail->car;               //append the spliced list to the pretail
+                delete tail;
+                tail = pretail->cdr;
+            }
+            else
+            {                                           //if we don't have a pretail, we only have a head, and it's currently empty.
+                head = *head.car;                       //replace the head cons with its contents.
+            }
+            while (tail && tail->car)      //cdr to the end of the list so more stuff can be appended.
+            {
+                pretail = tail;
+                tail = tail->cdr;
+            }
+        }
+        else                                            //if the tail has not just been spliced in, we need to add a new cons to the end.
+        {
+            tail->cdr = new cell(v_list);
+            pretail = tail;
+            tail = tail->cdr;
+        }
         iter = iter->cdr;
     }
     return head;
@@ -289,8 +321,8 @@ cell proc_quasi_quote(const cell &arglist)      //arglist wrapper (actual implem
 {
     if (!arglist.car)
         return nil;
-    else
-        return quasi_quote(*arglist.car);
+    bool _ = false;
+    return quasi_quote(*arglist.car, _);
 }
 
 cell proc_unquote(const cell &arglist)
@@ -427,6 +459,22 @@ cell proc_cdr(const cell &arglist)
     if (!cons.cdr)
         return nil;
     return *cons.cdr;
+}
+
+cell proc_list(const cell &arglist)
+{
+    cell head(v_list);
+    cell *tail = &head;
+    const cell *iter = &arglist;
+    while (iter && iter->car)
+    {
+        tail->car = new cell();
+        *tail->car = proc_eval(*iter->car);
+        tail->cdr = new cell(v_list);
+        tail = tail->cdr;
+        iter = iter->cdr;
+    }
+    return head;
 }
 
 cell proc_setq(const cell &arglist)

@@ -69,10 +69,18 @@ std::vector<token> tokenize(std::string progstring)
                     state = s_string;
                 else if (v == '\'' || v == '`' || v == ',')     //quote, backquote, comma
                 {
-                    char str[2];
-                    str[0] = v;
-                    str[1] = 0;
-                    tokens.push_back(token(t_quote, str));
+                    if (v == ',' && index < progstring.size() && progstring.c_str()[index + 1] == '@')
+                    {
+                        tokens.push_back(token(t_quote, ",@"));
+                        index++;
+                    }
+                    else
+                    {
+                        char str[2];
+                        str[0] = v;
+                        str[1] = 0;
+                        tokens.push_back(token(t_quote, str));
+                    }
                 }
             break;
             case s_number:

@@ -41,11 +41,24 @@ void setupGlobals()
     global_env->vars["CONS"] = proc_cons;
     global_env->vars["CAR"] = proc_car;
     global_env->vars["CDR"] = proc_cdr;
+    global_env->vars["LIST"] = proc_list;
     global_env->vars["SETQ"] = proc_setq;
     global_env->vars["LET"] = proc_let;
     global_env->vars["NIL"] = cell(v_symbol, "NIL");
     global_env->vars["TRUE"] = cell(v_symbol, "TRUE");
     env = global_env;
+
+    std::string runOnStart =
+    "(define defmacro (macro (name vars body) `(define ,name (macro ,vars ,body))))"
+    "(defmacro defun (name vars body) `(define ,name (lambda ,vars ,body)))"
+    "(defmacro while (expr body) `(tagbody top (if ,expr (begin ,body (go top))) end))";
+    parser p(tokenize(runOnStart));
+    try
+    {
+        while (true)
+            proc_eval(p.read());
+    }
+    catch (exception e) {}
 }
 
 
@@ -57,7 +70,6 @@ int main()
         char progstring[5000];
         std::cout << "> ";
         std::cin.getline(progstring, 5000, '\n');
-
         std::vector<token> tokens = tokenize(progstring);
         parser p(tokens);
         try
@@ -69,6 +81,10 @@ int main()
         catch (exception e)
         {
             std::cout << e.err << "\n";
+        }
+        catch (tag t)
+        {
+            std::cout << "Error: tried to go to unmatched tag \"" << t.str << "\"\n";
         }
     }
     return 0;

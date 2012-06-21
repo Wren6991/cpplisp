@@ -36,6 +36,7 @@ cell proc_eval_arglist(const cell &arglist);
 cell proc_cons(const cell &arglist);
 cell proc_car(const cell &arglist);
 cell proc_cdr(const cell &arglist);
+cell proc_list(const cell &arglist);
 cell proc_setq(const cell &arglist);
 
 struct tag

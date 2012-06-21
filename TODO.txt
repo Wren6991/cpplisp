@@ -3,10 +3,9 @@
   - tagbody, go
 - &rest + &optional arguments.
 - multi-form function bodies.
-- ,@ (list unquote) operator
+- setf (places/references - change proc signature to return cell&?)
 === Should:
 - proper memory management
-- defun (macro?)
 - assoc-lists
 - hashes
 === Could:
