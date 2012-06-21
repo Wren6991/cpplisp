@@ -61,6 +61,20 @@ void setupGlobals()
     catch (exception e) {}
 }
 
+int countBrackets(std::vector<token> tokens)
+{
+    int count = 0;
+    std::vector<token>::iterator iter = tokens.begin();
+    for(; iter != tokens.end(); iter++)
+    {
+        if (iter->type == t_lparen)
+            count++;
+        else if (iter->type == t_rparen)
+            count--;
+    }
+    return count;
+}
+
 
 int main()
 {
@@ -71,6 +85,14 @@ int main()
         std::cout << "> ";
         std::cin.getline(progstring, 5000, '\n');
         std::vector<token> tokens = tokenize(progstring);
+        while (countBrackets(tokens) > 0)
+        {
+            std::cout << ">> ";          //we are expecting more input!
+            std::cin.getline(progstring, 5000, '\n');
+            std::vector<token> extratokens = tokenize(progstring);
+            tokens.reserve(tokens.size() + extratokens.size());
+            tokens.insert(tokens.end(), extratokens.begin(), extratokens.end());
+        }
         parser p(tokens);
         try
         {
