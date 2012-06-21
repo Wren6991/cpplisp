@@ -73,6 +73,13 @@ cell proc_print(const cell &x)
     return output;
 }
 
+cell proc_write(const cell &x)
+{
+    cell output = proc_eval(*x.car);
+    std::cout << toString(output);
+    return output;
+}
+
 cell proc_define(const cell &arglist)
 {
     if (!arglist.car || !arglist.cdr || !arglist.cdr->car)
@@ -395,6 +402,13 @@ cell expand_macro(const cell& macro, const cell& arglist)
     const cell *name_iter = macro.car;
     while (arg_iter && arg_iter->car && name_iter && name_iter->car)
     {
+        if (name_iter->car->str == "&REST")
+        {
+            if (!(name_iter->cdr && name_iter->cdr->car && name_iter->cdr->car->type == v_symbol))
+                throw(exception("Error: no symbol provided for macro &rest argument name"));
+            env->vars[name_iter->cdr->car->str] = *arg_iter;
+            break;
+        }
         env->vars[name_iter->car->str] = *arg_iter->car;
         arg_iter = arg_iter->cdr;
         name_iter = name_iter->cdr;
@@ -528,6 +542,25 @@ cell proc_go(const cell &arglist)
     throw(tag(arglist.car->str));
 }
 
+cell proc_nreverse(const cell &arglist)
+{
+    cell head;
+    if (!arglist.car || (head = proc_eval(*arglist.car)).type != v_list)
+        throw(exception("Error: expected list as argument to nreverse."));
+    cell *last = new cell(v_list);
+    cell *tail = new cell(v_list);
+    *tail = head;
+    while (tail && tail->car)
+    {
+        cell *next = tail->cdr;
+        tail->cdr = last;
+        last = tail;
+        tail = next;
+    }
+    env->get(arglist.car->str) = *last;
+    return *last;
+}
+
 cell proc_let(const cell &arglist)
 {
     if (!arglist.car || arglist.car->type != v_list)
@@ -598,10 +631,32 @@ cell proc_eval(const cell &x)
             const cell *arg_iter = x.cdr;
             while (arg_iter && arg_iter->car && name_iter && name_iter->car)
             {
+                if (name_iter->car->str == "&REST")
+                {
+                    if (!(name_iter->cdr && name_iter->cdr->car && name_iter->cdr->car->type == v_symbol))
+                        throw(exception("Error: expected name for &rest parameter"));
+                    cell head(v_list);
+                    cell *tail = &head;
+                    while (arg_iter && arg_iter->car)
+                    {
+                        tail->car = new cell();
+                        *tail->car = proc_eval(*arg_iter->car);
+                        tail->cdr = new cell(v_list);
+                        tail = tail->cdr;
+                        arg_iter = arg_iter->cdr;
+                    }
+                    newenv->vars[name_iter->cdr->car->str] = head;
+                    name_iter = name_iter->cdr->cdr;
+                    break;                              //skip the outer loop so we don't dereference the null car pointer.
+                }
                 newenv->vars[name_iter->car->str] = proc_eval(*arg_iter->car);
                 arg_iter = arg_iter->cdr;
                 name_iter = name_iter->cdr;
             }
+            if (arg_iter && arg_iter->car)
+                throw(exception("Error: too many arguments to function"));
+            if (name_iter && name_iter->car)
+                throw(exception("Error: too few arguments to function"));
             env = newenv;
             cell result = proc_eval(*head.cdr->car);
             env = oldenv;

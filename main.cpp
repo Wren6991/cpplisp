@@ -14,6 +14,7 @@ void setupGlobals()
     global_env_ptr = new environment();
     global_env = std::shared_ptr<environment>(global_env_ptr);
     global_env->vars["PRINT"] = proc_print;
+    global_env->vars["WRITE"] = proc_write;
     global_env->vars["EVAL"] = proc_eval_arglist;   //arglist interface to actual eval function.
     global_env->vars["+"] = proc_add;
     global_env->vars["-"] = proc_subtract;
@@ -43,6 +44,7 @@ void setupGlobals()
     global_env->vars["CDR"] = proc_cdr;
     global_env->vars["LIST"] = proc_list;
     global_env->vars["SETQ"] = proc_setq;
+    global_env->vars["NREVERSE"] = proc_nreverse;
     global_env->vars["LET"] = proc_let;
     global_env->vars["NIL"] = cell(v_symbol, "NIL");
     global_env->vars["TRUE"] = cell(v_symbol, "TRUE");
@@ -51,7 +53,9 @@ void setupGlobals()
     std::string runOnStart =
     "(define defmacro (macro (name vars body) `(define ,name (macro ,vars ,body))))"
     "(defmacro defun (name vars body) `(define ,name (lambda ,vars ,body)))"
-    "(defmacro while (expr body) `(tagbody top (if ,expr (begin ,body (go top))) end))";
+    "(defmacro while (expr &rest body) `(tagbody top (if ,expr (begin ,@body (go top))) end))"
+    "(defmacro when (cond &rest body) `(if ,cond (begin ,@body)))"
+    "(defmacro unless (cond &rest body) `(if (not ,cond) (begin ,@body)))";
     parser p(tokenize(runOnStart));
     try
     {

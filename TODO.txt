@@ -1,7 +1,7 @@
 === Must:
 - control: while, loop
   - tagbody, go
-- &rest + &optional arguments.
+- &optional arguments.
 - multi-form function bodies.
 - setf (places/references - change proc signature to return cell&?)
 === Should:

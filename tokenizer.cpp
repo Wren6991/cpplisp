@@ -42,6 +42,7 @@ std::vector<token> tokenize(std::string progstring)
     characterAllowed['='] = true;
     characterAllowed['!'] = true;
     characterAllowed['?'] = true;
+    characterAllowed['&'] = true;
 
     std::vector<token> tokens;
     state_enum state = s_start;

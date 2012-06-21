@@ -6,6 +6,7 @@
 std::string toString(const cell& x);
 
 cell proc_print(const cell &x);
+cell proc_write(const cell &x);
 cell proc_define(const cell &arglist);
 cell proc_add(const cell &x);
 cell proc_subtract(const cell &x);
@@ -28,6 +29,7 @@ cell proc_lambda(const cell &arglist);
 cell proc_macro(const cell &arglist);
 cell proc_macroexpand(const cell &arglist);
 cell proc_listvars(const cell &_);
+cell proc_nreverse(const cell &arglist);
 cell proc_let(const cell &arglist);
 cell proc_tagbody(const cell &arglist);
 cell proc_go(const cell &arglist);

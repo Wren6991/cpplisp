@@ -27,3 +27,16 @@ e
 (define defmacro (macro (var lis body) `(define ,var (macro ,lis ,body))))
 (defmacro add (x y) `(+ ,x ,y))
 ; ==> (DEFINE ADD (MACRO (X Y) (QUASI-QUOTE (+ (UN-QUOTE X) (UN-QUOTE Y)))))
+
+(defmacro dotimes (n body) `(
+ let ((iter-var 0) (upper-limit ,n)) (tagbody top ,body (setq iter-var (+ iter-var 1)) (if
+ (< iter-var upper-limit) (go top)) end))
+ )
+ (defun plot (func min max) (dotimes (+ 1 (- max min)) (begin (dotimes (func (+
+min iter-var)) (write "*")) (print ""))))
+(plot (lambda (x) (* x x)) (- 0 8) 8)
+
+
+(defun lol (&rest args) (print args))
+
+(lol ''x ''y ''z)
