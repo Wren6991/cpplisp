@@ -20,6 +20,11 @@ std::string toString(const cell& x)
     switch(x.type)
     {
         case v_string:
+        {
+            std::stringstream ss;
+            ss << "\"" << x.str << "\"";
+            return ss.str();
+        }
         case v_symbol:
             return x.str;
         case v_number:
@@ -456,9 +461,7 @@ cell proc_car(const cell &arglist)
     if (!arglist.car)
         return nil;
     cell cons = proc_eval(*arglist.car);
-    if (cons.type != v_list)
-        throw(exception("Error: tried to take car of non-list."));
-    if (!cons.car)
+    if (cons.type != v_list || !cons.car)
         return nil;
     return *cons.car;
 }
@@ -468,9 +471,7 @@ cell proc_cdr(const cell &arglist)
     if (!arglist.car)
         return nil;
     cell cons = proc_eval(*arglist.car);
-    if (cons.type != v_list)
-        throw(exception("Error: tried to take cdr of non-list."));
-    if (!cons.cdr)
+    if (cons.type != v_list || !cons.cdr)
         return nil;
     return *cons.cdr;
 }
@@ -658,7 +659,13 @@ cell proc_eval(const cell &x)
             if (name_iter && name_iter->car)
                 throw(exception("Error: too few arguments to function"));
             env = newenv;
-            cell result = proc_eval(*head.cdr->car);
+            cell result;
+            cell *body_iter = head.cdr;
+            while (body_iter && body_iter->car)
+            {
+                result = proc_eval(*body_iter->car);
+                body_iter = body_iter->cdr;
+            }
             env = oldenv;
             return result;
         }

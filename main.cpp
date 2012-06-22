@@ -51,11 +51,19 @@ void setupGlobals()
     env = global_env;
 
     std::string runOnStart =
-    "(define defmacro (macro (name vars body) `(define ,name (macro ,vars ,body))))"
-    "(defmacro defun (name vars body) `(define ,name (lambda ,vars ,body)))"
+    "(define defmacro (macro (name vars &rest body) `(define ,name (macro ,vars ,@body))))"
+    "(defmacro defun (name vars &rest body) `(define ,name (lambda ,vars ,@body)))"
     "(defmacro while (expr &rest body) `(tagbody top (if ,expr (begin ,@body (go top))) end))"
     "(defmacro when (cond &rest body) `(if ,cond (begin ,@body)))"
-    "(defmacro unless (cond &rest body) `(if (not ,cond) (begin ,@body)))";
+    "(defmacro unless (cond &rest body) `(if (not ,cond) (begin ,@body)))"
+    "(defmacro mapcar (func list) `(let ((acc '()) (lis ,list) (fun ,func))"
+    " (tagbody top"
+    "  (when (cdr lis)"
+    "        (push acc (fun (car lis)))"
+    "        (setq lis (cdr lis))"
+    "        (go top))"
+    "  (nreverse acc))))"
+    "(defmacro push (list arg) `(setq ,list (cons ,arg ,list)))";
     parser p(tokenize(runOnStart));
     try
     {
