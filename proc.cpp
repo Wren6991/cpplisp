@@ -582,11 +582,15 @@ cell proc_let(const cell &arglist)
         }
         iter = iter->cdr;
     }
-    if (!arglist.cdr || !arglist.cdr->car)
-        throw(exception("Error: let is missing body."));
     std::shared_ptr<environment> oldenv = env;
     env = newenv;
-    cell result = proc_eval(*arglist.cdr->car);
+    cell result;
+    iter = arglist.cdr;
+    while (iter && iter->car)
+    {
+        result = proc_eval(*iter->car);
+        iter = iter->cdr;
+    }
     env = oldenv;
     return result;
 }
