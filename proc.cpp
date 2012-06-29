@@ -7,8 +7,8 @@
 #include "proc.h"
 
 
-extern std::shared_ptr<environment> global_env;
-extern std::shared_ptr<environment> env;
+std::shared_ptr<environment> global_env;
+std::shared_ptr<environment> env;
 
 
 
@@ -117,7 +117,7 @@ cell proc_subtract(const cell &x)
     {
         total -= proc_eval(*iter->car).n;
         iter = iter->cdr;
-        if (first)
+        if (first && iter->cdr)
         {
             total = -total;
             first = false;
@@ -525,7 +525,7 @@ cell proc_tagbody(const cell &arglist)
             result = proc_eval(*expressions[exprindex]);
             exprindex++;
         }
-        catch (tag t)
+        catch (tag_sym t)
         {
             if (tagindices.find(t.str) == tagindices.end())
                 throw(t);                                   //doesn't belong to this tag body - pass it on to the next, or to the REPL if it isn't caught.
@@ -540,7 +540,7 @@ cell proc_go(const cell &arglist)
 {
     if (!arglist.car || arglist.car->type != v_symbol)
         throw(exception("Error: expected symbol as argument to go."));
-    throw(tag(arglist.car->str));
+    throw(tag_sym(arglist.car->str));
 }
 
 cell proc_nreverse(const cell &arglist)

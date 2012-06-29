@@ -5,9 +5,9 @@
 #include "proc.h"
 
 
-std::shared_ptr<environment> global_env;
+extern std::shared_ptr<environment> global_env;
 environment *global_env_ptr;
-std::shared_ptr<environment> env;
+extern std::shared_ptr<environment> env;
 
 void setupGlobals()
 {
@@ -116,7 +116,7 @@ int main()
         {
             std::cout << e.err << "\n";
         }
-        catch (tag t)
+        catch (tag_sym t)
         {
             std::cout << "Error: tried to go to unmatched tag \"" << t.str << "\"\n";
         }

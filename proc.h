@@ -41,11 +41,11 @@ cell proc_cdr(const cell &arglist);
 cell proc_list(const cell &arglist);
 cell proc_setq(const cell &arglist);
 
-struct tag
+struct tag_sym
 {
     std::string str;
-    tag() {}
-    tag(std::string str_) {str = str_;}
+    tag_sym() {}
+    tag_sym(std::string str_) {str = str_;}
 };
 
 #endif // PROC_H_INCLUDED
